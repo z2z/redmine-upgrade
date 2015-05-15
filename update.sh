@@ -20,7 +20,7 @@ then
 ${0}: missing version
 Usage: ${0} [VERSION]
 
-eg: ${0} 3.0.2
+eg: ${0} 3.0.3
 EOF
 exit 1
 fi
@@ -64,6 +64,7 @@ else
 	if [ ! -d ${REDMINE_PATH}/shared/files ]
 	then
 	    mkdir -p ${REDMINE_PATH}/shared/files
+	    chown -R ${REDMINE_USER}:${REDMINE_GROUP} ${REDMINE_PATH}/shared/files
 	fi
 	# plugins folder
 	echo -n 'plugins, '
@@ -73,9 +74,9 @@ else
 	fi
 	# themes folder
 	echo -n 'themes)'
-	if [ ! -d ${REDMINE_PATH}/shared/public/themes ]
+	if [ ! -d ${REDMINE_PATH}/shared/themes ]
 	then
-	    mkdir -p ${REDMINE_PATH}/shared/public/themes
+	    mkdir -p ${REDMINE_PATH}/shared/themes
 	fi
     fi
 fi
@@ -87,16 +88,18 @@ mysqldump ${REDMINE_DB} > ${REDMINE_PATH}/backup/database-${DATE}.sql
 if [ $? -ne 0 ]
 then
     echo -e "\\033[31m KO: error with mysqldump"
+    exit 1
 else
     echo -e "\\033[32m OK"
 fi
 
 # download
 echo -ne "\\033[39m-- download redmine version ${VERSION} (redmine-${VERSION}.tar.gz) in /usr/src"
-wget -q -O /usr/src/${VERSION}.tar.gz http://www.redmine.org/releases/redmine-${VERSION}.tar.gz
+wget -q -O /usr/src/redmine-${VERSION}.tar.gz http://www.redmine.org/releases/redmine-${VERSION}.tar.gz
 if [ $? -ne 0 ]
 then
     echo -e "\\033[31m KO: error with wget"
+    exit 1
 else
     echo -e "\\033[32m OK"
 fi
@@ -107,6 +110,7 @@ tar -C ${REDMINE_PATH} -xzf /usr/src/redmine-${VERSION}.tar.gz
 if [ $? -ne 0 ]
 then
     echo -e "\\033[31m KO: error with tar"
+    exit 1
 else
     echo -e "\\033[32m OK"
 fi
@@ -117,8 +121,14 @@ find ${REDMINE_PATH}/redmine-${VERSION} -type d -exec chmod 755 {} \;
 find ${REDMINE_PATH}/redmine-${VERSION} -type f -exec chmod 644 {} \;
 echo -n " (redmine-${VERSION}, "
 chown -R root:root ${REDMINE_PATH}/redmine-${VERSION}
-echo -n 'log, tmp)'
-chown -R ${REDMINE_USER}:${REDMINE_GROUP} ${REDMINE_PATH}/redmine-${VERSION}/log ${REDMINE_PATH}/redmine-${VERSION}/tmp
+echo -n 'files, '
+chown -R ${REDMINE_USER}:${REDMINE_GROUP} ${REDMINE_PATH}/shared/files
+echo -n 'log, '
+chown -R ${REDMINE_USER}:${REDMINE_GROUP} ${REDMINE_PATH}/redmine-${VERSION}/log
+echo -n 'tmp, '
+chown -R ${REDMINE_USER}:${REDMINE_GROUP} ${REDMINE_PATH}/redmine-${VERSION}/tmp
+echo -n 'plugin_assets)'
+chown -R ${REDMINE_USER}:${REDMINE_GROUP} ${REDMINE_PATH}/redmine-${VERSION}/public/plugin_assets
 echo -e "\\033[32m OK"
 
 # symlink current
@@ -131,75 +141,125 @@ then
 elif [ -d ${REDMINE_PATH}/current ] || [ -f ${REDMINE_PATH}/current ]
 then
     echo -e "\\033[31m KO: current is a folder or file"
+    exit 1
+else
+    ln -s redmine-${VERSION} current
 fi
 cd ${REDMINE_PATH}/current
 echo -e "\\033[32m OK"
 
+# symlink configuration
+echo -ne "\\033[39m-- create configuration symlink in ${REDMINE_PATH}/config (redmine-${VERSION})"
+ln -s /etc/redmine/configuration.yml ${REDMINE_PATH}/current/config/configuration.yml
+ln -s /etc/redmine/database.yml      ${REDMINE_PATH}/current/config/database.yml
+echo -e "\\033[32m OK"
+
 # symlink files
 echo -ne "\\033[39m-- create files symlink in ${REDMINE_PATH}/current (redmine-${VERSION})"
+cd ${REDMINE_PATH}/current
+if [ -d ${REDMINE_PATH}/current/files ]
+then
+    rm -rf ${REDMINE_PATH}/current/files
+fi
+ln -s ../shared/files ${REDMINE_PATH}/current/files
+if [ $? -ne 0 ]
+then
+    echo -e "\\033[31m KO: error with tar"
+    exit 1
+else
+    echo -e "\\033[32m OK"
+fi
+
+# symlink themes
+echo -ne "\\033[39m-- create themes symlink in ${REDMINE_PATH}/current/public/themes (redmine-${VERSION})"
+cd ${REDMINE_PATH}/current
+for theme in `ls ${REDMINE_PATH}/shared/themes`
+do
+    echo -n " $line"
+    ln -s ../../../shared/public/themes/${theme} ${REDMINE_PATH}/current/public/themes
+done
 echo -e "\\033[32m OK"
 
 # symlink plugins
-echo -ne "\\033[39m-- create plugins symlink in ${REDMINE_PATH}/current (redmine-${VERSION})"
+echo -ne "\\033[39m-- create plugins symlink in ${REDMINE_PATH}/current/plugins (redmine-${VERSION})"
+###
+### missing work here...
+###
 echo -e "\\033[32m OK"
 
 # bundle install
 echo -ne "\\033[39m-- bundle install in ${REDMINE_PATH}/current (redmine-${VERSION})"
-# bundle install --no-color --without development test > /dev/null
+cd ${REDMINE_PATH}/current
+env RAILS_ENV=${RAILS_ENV} bundle install --no-color --without development test > /dev/null
 if [ $? -ne 0 ]
 then
-    echo -e "\\033[31m KO: error with bundle install"
+    echo -e "\\033[31m KO"
+    exit 1
 else
     echo -e "\\033[32m OK"
 fi
 
 # rake generate_secret_token
 echo -ne "\\033[39m-- rake generate_secret_token in ${REDMINE_PATH}/current (redmine-${VERSION})"
-# bundle exec rake generate_secret_token
+cd ${REDMINE_PATH}/current
+env RAILS_ENV=${RAILS_ENV} bundle exec rake generate_secret_token
 if [ $? -ne 0 ]
 then
-    echo -e "\\033[31m KO: error with rake generate_secret_token (bundle exec)"
+    echo -e "\\033[31m KO"
+    exit 1
 else
     echo -e "\\033[32m OK"
 fi
 
 # rake db:migrate
 echo -ne "\\033[39m-- rake db:migrate in ${REDMINE_PATH}/current (redmine-${VERSION})"
-# bundle exec rake db:migrate
+cd ${REDMINE_PATH}/current
+env RAILS_ENV=${RAILS_ENV} bundle exec rake db:migrate
 if [ $? -ne 0 ]
 then
-    echo -e "\\033[31m KO: error with rake db:migrate (bundle exec)"
+    echo -e "\\033[31m KO"
+    exit 1
 else
     echo -e "\\033[32m OK"
 fi
 
 # rake redmine:plugins:migrate
 echo -ne "\\033[39m-- rake redmine:plugins:migrate in ${REDMINE_PATH}/current (redmine-${VERSION})"
-# bundle exec rake redmine:plugins:migrate
+cd ${REDMINE_PATH}/current
+env RAILS_ENV=${RAILS_ENV} bundle exec rake redmine:plugins:migrate
 if [ $? -ne 0 ]
 then
-    echo -e "\\033[31m KO: error with rake redmine:plugins:migrate (bundle exec)"
+    echo -e "\\033[31m KO"
+    exit 1
 else
     echo -e "\\033[32m OK"
 fi
 
 # rake tmp:cache:clear
-echo -ne "\\033[39m-- rake tmp:cache:clear in ${REDMINE_PATH}/current (redmine-${VERSION})"
-# bundle exec rake tmp:cache:clear
+echo -ne "\\033[39m-- rake tmp:cache:clear tmp:sessions:clear in ${REDMINE_PATH}/current (redmine-${VERSION})"
+cd ${REDMINE_PATH}/current
+env RAILS_ENV=${RAILS_ENV} bundle exec rake tmp:cache:clear tmp:sessions:clear
 if [ $? -ne 0 ]
 then
-    echo -e "\\033[31m KO: error with rake tmp:cache:clear (bundle exec)"
+    echo -e "\\033[31m KO"
+    exit 1
 else
     echo -e "\\033[32m OK"
 fi
 
-# rake tmp:session:clear
-echo -ne "\\033[39m-- rake tmp:session:clear in ${REDMINE_PATH}/current (redmine-${VERSION})"
-# bundle exec rake tmp:session:clear
-if [ $? -ne 0 ]
-then
-    echo -e "\\033[31m KO: error with rake tmp:session:clear (bundle exec)"
-else
-    echo -e "\\033[32m OK"
-fi
+# reset color and print final message
+echo -ne "\\033[39m"
+cat <<EOF
+
+################################################################################
+#
+#	Redmine upgrade to version ${VERSION} finished \o/
+#
+#	Now you need to reload your http daemon.
+#
+#	service apache2 reload or service nginx reload
+#
+#
+################################################################################
+EOF
 # EOF
