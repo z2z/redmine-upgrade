@@ -176,7 +176,7 @@ cd ${REDMINE_PATH}/current
 for theme in `ls ${REDMINE_PATH}/shared/themes`
 do
     echo -n " $line"
-    ln -s ../../../shared/public/themes/${theme} ${REDMINE_PATH}/current/public/themes
+    ln -s ../../../shared/themes/${theme} ${REDMINE_PATH}/current/public/themes/${theme}
 done
 echo -e "\\033[32m OK"
 
