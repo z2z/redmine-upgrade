@@ -14,6 +14,9 @@ This is a simple script to upgrade from one Redmine version to another.
 
 ## Description
 
+The  script  follow all  the  steps  of the  official  redmine  upgrade guide  :
+http://www.redmine.org/projects/redmine/wiki/RedmineUpgrade
+
 ## Setup
 
 This script need to have a specifig  files and folders tree, but you can replace
