@@ -45,7 +45,7 @@ is the folder containing files, themes and plugins.
 
  ```sh
  $> cd /srv/redmine
- $> update.sh 3.0.3
+ $> upgrade.sh 3.0.3
  ```
 
 ## Development
