@@ -24,7 +24,7 @@ Usage: ${0} [VERSION]
 
 eg: ${0} 3.0.3
 EOF
-exit 1
+exit 0
 fi
 
 # main variables
