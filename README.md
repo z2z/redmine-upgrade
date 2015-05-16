@@ -20,7 +20,7 @@ http://www.redmine.org/projects/redmine/wiki/RedmineUpgrade
 ## Setup
 
 This script need to have a specifig  files and folders tree, but you can replace
-'/srv/redmine' with the folder of your choice.
+**/srv/redmine** with the folder of your choice.
 
  ```sh
  $> cd /srv/redmine
@@ -33,8 +33,8 @@ This script need to have a specifig  files and folders tree, but you can replace
  shared
  ```
 
-Actually 'current' is  a symlink to the last version  in production and 'shared'
-is the folder containing files, themes and plugins.
+Actually  **current**  is  a symlink  to  the  last  version in  production  and
+**shared** is the folder containing files, themes and plugins.
 
  ```sh
  $> cd /srv/redmine/shared
@@ -44,7 +44,22 @@ is the folder containing files, themes and plugins.
  themes
  ```
 
+There's some default value at the beginning  of the script but you can have your
+own in **/etc/redmine.upgrade** file.
+
+ ```sh
+ $> cat /etc/redmine.upgrade
+ REDMINE_PATH='/var/www/redmine'
+ REDMINE_USER='redmine'
+ REDMINE_GROUP='www-data'
+ REDMINE_DB='redmine'
+ RAILS_ENV='production'
+ ```
+
 ## Usage
+
+You can put  the script everywhere you want.  For this example we put  it in the
+Redmine's folder.
 
  ```sh
  $> cd /srv/redmine
@@ -53,4 +68,4 @@ is the folder containing files, themes and plugins.
 
 ## Development
 
-Feel free to contribute on GitHub.
+Feel free to contribute :)
