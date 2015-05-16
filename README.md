@@ -1,5 +1,7 @@
 # redmine-upgrade
 
+[![Build Status](https://travis-ci.org/rentabiliweb/redmine-upgrade.svg)](https://travis-ci.org/rentabiliweb/redmine-upgrade)
+
 #### Table of Contents
 
 1. [Overview](#overview)
