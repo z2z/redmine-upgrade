@@ -6,9 +6,10 @@
 
 1. [Overview](#overview)
 2. [Description](#description)
-3. [Setup](#setup)
-4. [Usage](#usage)
-5. [Development](#development)
+3. [Requirements](#requirements)
+4. [Setup](#setup)
+5. [Usage](#usage)
+6. [Development](#development)
 
 ## Overview
 
@@ -18,6 +19,14 @@ This is a simple script to upgrade from one Redmine version to another.
 
 The  script  follow all  the  steps  of the  official  redmine  upgrade guide  :
 http://www.redmine.org/projects/redmine/wiki/RedmineUpgrade
+
+## Requirements
+
+On Debian (>= wheezy) & Ubuntu (>= trusy), you need the following packages :
+
+```bash
+$> sudo apt-get install mysql-client wget
+```
 
 ## Setup
 
