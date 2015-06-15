@@ -27,6 +27,20 @@ EOF
 exit 0
 fi
 
+which mysqldump > /dev/null
+if [ $? -ne 0 ]
+then
+    echo -e "\\033[31mPlease install mysqldump (see README.md)\\033[39m"
+    exit 1
+fi
+
+which wget > /dev/null
+if [ $? -ne 0 ]
+then
+    echo -e "\\033[31mPlease install wget (see README.md)\\033[39m"
+    exit 1
+fi
+
 # main variables
 VERSION=${1}
 DATE=`date +%Y%m%d-%Hh%M`
