@@ -24,16 +24,16 @@ http://www.redmine.org/projects/redmine/wiki/RedmineUpgrade
 
 On Debian (>= wheezy) & Ubuntu (>= trusy), you need the following packages :
 
-```bash
-$> sudo apt-get install mysql-client wget
-```
+ ```bash
+ $> sudo apt-get install mysql-client wget
+ ```
 
 ## Setup
 
 This script need to have a specifig  files and folders tree, but you can replace
 **/srv/redmine** with the folder of your choice.
 
- ```sh
+ ```bash
  $> cd /srv/redmine
  $> ls
  current
@@ -47,7 +47,7 @@ This script need to have a specifig  files and folders tree, but you can replace
 Actually  **current**  is  a symlink  to  the  last  version in  production  and
 **shared** is the folder containing files, themes and plugins.
 
- ```sh
+ ```bash
  $> cd /srv/redmine/shared
  $> ls
  files
@@ -58,7 +58,7 @@ Actually  **current**  is  a symlink  to  the  last  version in  production  and
 There's some default value at the beginning  of the script but you can have your
 own in **/etc/redmine.upgrade** file.
 
- ```sh
+ ```bash
  $> cat /etc/redmine.upgrade
  REDMINE_PATH='/var/www/redmine'
  REDMINE_USER='redmine'
@@ -72,7 +72,7 @@ own in **/etc/redmine.upgrade** file.
 You can put  the script everywhere you want.  For this example we put  it in the
 Redmine's folder.
 
- ```sh
+ ```bash
  $> cd /srv/redmine
  $> upgrade.sh 3.0.3
  ```
