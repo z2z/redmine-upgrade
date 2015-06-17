@@ -20,9 +20,10 @@ if [ ${#} -lt 1 ]
 then
     cat <<EOF
 ${0}: missing version
-Usage: ${0} [VERSION]
+Usage: ${0} [VERSION].
 
 eg: ${0} 3.0.3
+    ${0} latest to get the latest version
 EOF
 exit 0
 fi
@@ -41,8 +42,14 @@ then
     exit 1
 fi
 
+if [ ${1} == "latest" ]
+then
+    VERSION=`curl -s http://www.redmine.org/releases/ | awk -F "\"" '{print $8}' | grep .zip$ | sed -r 's/.*-([0-9].[0-9].[0-9])\..*/\1/g' | tail -1`
+else
+    VERSION=${1}
+fi
+
 # main variables
-VERSION=${1}
 DATE=`date +%Y%m%d-%Hh%M`
 # default values
 REDMINE_PATH='/srv/redmine'
