@@ -77,6 +77,13 @@ Redmine's folder.
  $> upgrade.sh 3.0.3
  ```
 
+You can use the following command to upgrade to the latest version of redmine.
+
+```bash
+ $> cd /srv/redmine
+ $> upgrade.sh latest
+```
+
 ## Development
 
 Feel free to contribute :)
