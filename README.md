@@ -69,13 +69,20 @@ own in **/etc/redmine.upgrade** file.
 
 ## Usage
 
-You can put  the script everywhere you want.  For this example we put  it in the
+You can put  the script everywhere you want.  For this example we put it in the
 Redmine's folder.
 
  ```bash
  $> cd /srv/redmine
  $> upgrade.sh 3.0.3
  ```
+
+You can use the following command to upgrade to the latest version of redmine.
+
+```bash
+ $> cd /srv/redmine
+ $> upgrade.sh latest
+```
 
 ## Development
 
