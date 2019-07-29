@@ -154,37 +154,37 @@ echo -n 'plugin_assets)'
 chown -R ${REDMINE_USER}:${REDMINE_GROUP} ${REDMINE_PATH}/redmine-${VERSION}/public/plugin_assets
 echo -e "\\033[32m OK"
 
-# symlink current
-echo -ne "\\033[39m-- create current symlink in ${REDMINE_PATH} (redmine-${VERSION})"
+# symlink current / htdocs
+echo -ne "\\033[39m-- create htdocs symlink in ${REDMINE_PATH} (redmine-${VERSION})"
 cd ${REDMINE_PATH}
-if [ -h ${REDMINE_PATH}/current ]
+if [ -h ${REDMINE_PATH}/htdocs ]
 then
-    rm ${REDMINE_PATH}/current
-    ln -s redmine-${VERSION} current
-elif [ -d ${REDMINE_PATH}/current ] || [ -f ${REDMINE_PATH}/current ]
+    rm ${REDMINE_PATH}/htdocs
+    ln -s redmine-${VERSION} htdocs
+elif [ -d ${REDMINE_PATH}/htdocs ] || [ -f ${REDMINE_PATH}/htdocs ]
 then
-    echo -e "\\033[31m KO: current is a folder or file"
+    echo -e "\\033[31m KO: htdocs is a folder or file"
     exit 1
 else
-    ln -s redmine-${VERSION} current
+    ln -s redmine-${VERSION} htdocs
 fi
-cd ${REDMINE_PATH}/current
+cd ${REDMINE_PATH}/htdocs
 echo -e "\\033[32m OK"
 
 # symlink configuration
 echo -ne "\\033[39m-- create configuration symlink in ${REDMINE_PATH}/config (redmine-${VERSION})"
-ln -s /etc/redmine/configuration.yml ${REDMINE_PATH}/current/config/configuration.yml
-ln -s /etc/redmine/database.yml      ${REDMINE_PATH}/current/config/database.yml
+ln -s /etc/redmine/configuration.yml ${REDMINE_PATH}/htdocs/config/configuration.yml
+ln -s /etc/redmine/database.yml      ${REDMINE_PATH}/htdocs/config/database.yml
 echo -e "\\033[32m OK"
 
 # symlink files
-echo -ne "\\033[39m-- create files symlink in ${REDMINE_PATH}/current (redmine-${VERSION})"
-cd ${REDMINE_PATH}/current
-if [ -d ${REDMINE_PATH}/current/files ]
+echo -ne "\\033[39m-- create files symlink in ${REDMINE_PATH}/htdocs (redmine-${VERSION})"
+cd ${REDMINE_PATH}/htdocs
+if [ -d ${REDMINE_PATH}/htdocs/files ]
 then
-    rm -rf ${REDMINE_PATH}/current/files
+    rm -rf ${REDMINE_PATH}/htdocs/files
 fi
-ln -s ../shared/files ${REDMINE_PATH}/current/files
+ln -s ../shared/files ${REDMINE_PATH}/htdocs/files
 if [ $? -ne 0 ]
 then
     echo -e "\\033[31m KO: error with tar"
@@ -194,25 +194,25 @@ else
 fi
 
 # symlink themes
-echo -ne "\\033[39m-- create themes symlink in ${REDMINE_PATH}/current/public/themes (redmine-${VERSION})"
-cd ${REDMINE_PATH}/current
+echo -ne "\\033[39m-- create themes symlink in ${REDMINE_PATH}/htdocs/public/themes (redmine-${VERSION})"
+cd ${REDMINE_PATH}/htdocs
 for theme in `ls ${REDMINE_PATH}/shared/themes`
 do
     echo -n " $line"
-    ln -s ../../../shared/themes/${theme} ${REDMINE_PATH}/current/public/themes/${theme}
+    ln -s ../../../shared/themes/${theme} ${REDMINE_PATH}/htdocs/public/themes/${theme}
 done
 echo -e "\\033[32m OK"
 
 # symlink plugins
-echo -ne "\\033[39m-- create plugins symlink in ${REDMINE_PATH}/current/plugins (redmine-${VERSION})"
+echo -ne "\\033[39m-- create plugins symlink in ${REDMINE_PATH}/htdocs/plugins (redmine-${VERSION})"
 ###
 ### missing work here...
 ###
 echo -e "\\033[32m OK"
 
 # bundle install
-echo -ne "\\033[39m-- bundle install in ${REDMINE_PATH}/current (redmine-${VERSION})"
-cd ${REDMINE_PATH}/current
+echo -ne "\\033[39m-- bundle install in ${REDMINE_PATH}/htdocs (redmine-${VERSION})"
+cd ${REDMINE_PATH}/htdocs
 env RAILS_ENV=${RAILS_ENV} bundle install --no-color --without development test > /dev/null
 if [ $? -ne 0 ]
 then
@@ -223,8 +223,8 @@ else
 fi
 
 # rake generate_secret_token
-echo -ne "\\033[39m-- rake generate_secret_token in ${REDMINE_PATH}/current (redmine-${VERSION})"
-cd ${REDMINE_PATH}/current
+echo -ne "\\033[39m-- rake generate_secret_token in ${REDMINE_PATH}/htdocs (redmine-${VERSION})"
+cd ${REDMINE_PATH}/htdocs
 env RAILS_ENV=${RAILS_ENV} bundle exec rake generate_secret_token
 if [ $? -ne 0 ]
 then
@@ -235,8 +235,8 @@ else
 fi
 
 # rake db:migrate
-echo -ne "\\033[39m-- rake db:migrate in ${REDMINE_PATH}/current (redmine-${VERSION})"
-cd ${REDMINE_PATH}/current
+echo -ne "\\033[39m-- rake db:migrate in ${REDMINE_PATH}/htdocs (redmine-${VERSION})"
+cd ${REDMINE_PATH}/htdocs
 env RAILS_ENV=${RAILS_ENV} bundle exec rake db:migrate
 if [ $? -ne 0 ]
 then
@@ -247,8 +247,8 @@ else
 fi
 
 # rake redmine:plugins:migrate
-echo -ne "\\033[39m-- rake redmine:plugins:migrate in ${REDMINE_PATH}/current (redmine-${VERSION})"
-cd ${REDMINE_PATH}/current
+echo -ne "\\033[39m-- rake redmine:plugins:migrate in ${REDMINE_PATH}/htdocs (redmine-${VERSION})"
+cd ${REDMINE_PATH}/htdocs
 env RAILS_ENV=${RAILS_ENV} bundle exec rake redmine:plugins:migrate
 if [ $? -ne 0 ]
 then
@@ -259,8 +259,8 @@ else
 fi
 
 # rake tmp:cache:clear
-echo -ne "\\033[39m-- rake tmp:cache:clear tmp:sessions:clear in ${REDMINE_PATH}/current (redmine-${VERSION})"
-cd ${REDMINE_PATH}/current
+echo -ne "\\033[39m-- rake tmp:cache:clear tmp:sessions:clear in ${REDMINE_PATH}/htdocs (redmine-${VERSION})"
+cd ${REDMINE_PATH}/htdocs
 env RAILS_ENV=${RAILS_ENV} bundle exec rake tmp:cache:clear tmp:sessions:clear
 if [ $? -ne 0 ]
 then
