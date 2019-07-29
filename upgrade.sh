@@ -52,10 +52,10 @@ fi
 # main variables
 DATE=`date +%Y%m%d-%Hh%M`
 # default values
-REDMINE_PATH='/srv/redmine'
-REDMINE_USER='www-data'
-REDMINE_GROUP='www-data'
-REDMINE_DB='redmine'
+REDMINE_PATH='/opt/bitnami/apps/redmine'
+REDMINE_USER='bitnami'
+REDMINE_GROUP='daemon'
+REDMINE_DB='bitnami_redmine'
 RAILS_ENV='production'
 
 if [ -f /etc/redmine.upgrade ]
@@ -75,6 +75,11 @@ else
     if [ ! -d ${REDMINE_PATH}/backup ]
     then
 	mkdir -p ${REDMINE_PATH}/backup
+    fi
+    echo -n 'src, '
+    if [ ! -d ${REDMINE_PATH}/src ]
+    then
+	mkdir -p ${REDMINE_PATH}/src
     fi
     # shared folders (read README.md)
     echo -n 'shared, '
@@ -117,8 +122,8 @@ else
 fi
 
 # download
-echo -ne "\\033[39m-- download redmine version ${VERSION} (redmine-${VERSION}.tar.gz) in /usr/src"
-wget -q -O /usr/src/redmine-${VERSION}.tar.gz http://www.redmine.org/releases/redmine-${VERSION}.tar.gz
+echo -ne "\\033[39m-- download redmine version ${VERSION} (redmine-${VERSION}.tar.gz) in ${REDMINE_PATH}/src"
+wget -q -O ${REDMINE_PATH}/redmine-${VERSION}.tar.gz http://www.redmine.org/releases/redmine-${VERSION}.tar.gz
 if [ $? -ne 0 ]
 then
     echo -e "\\033[31m KO: error with wget"
@@ -128,8 +133,8 @@ else
 fi
 
 # extract
-echo -ne "\\033[39m-- extract redmine version ${VERSION} (redmine-${VERSION}.tar.gz) from /usr/src in ${REDMINE_PATH}"
-tar -C ${REDMINE_PATH} -xzf /usr/src/redmine-${VERSION}.tar.gz
+echo -ne "\\033[39m-- extract redmine version ${VERSION} (redmine-${VERSION}.tar.gz) from ${REDMINE_PATH}/src in ${REDMINE_PATH}"
+tar -C ${REDMINE_PATH} -xzf ${REDMINE_PATH}/src/redmine-${VERSION}.tar.gz
 if [ $? -ne 0 ]
 then
     echo -e "\\033[31m KO: error with tar"
